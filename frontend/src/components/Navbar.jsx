@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { Menu, Search } from "lucide-react";
 import NotificationCenter from "./NotificationCenter.jsx";
 import ProfileDropdown from "./ProfileDropdown.jsx";
+import ThemeSwitch from "./ThemeSwitch.jsx";
 import { useAuth } from "../context/AuthContext.jsx";
 
 export default function Navbar({ onOpenMobileNav, onOpenCommand }) {
@@ -14,7 +15,7 @@ export default function Navbar({ onOpenMobileNav, onOpenCommand }) {
     <motion.header
       initial={{ opacity: 0, y: -8 }}
       animate={{ opacity: 1, y: 0 }}
-      className="sticky top-0 z-40 border-b border-white/5 bg-[#09090B]/85 backdrop-blur-md"
+      className="theme-header-bg sticky top-0 z-40 border-b border-white/5 backdrop-blur-md"
     >
       <div className="mx-auto flex max-w-[1400px] items-center gap-3 px-4 py-3 sm:gap-4 sm:px-6 lg:px-10">
         <button
@@ -59,6 +60,7 @@ export default function Navbar({ onOpenMobileNav, onOpenCommand }) {
 
         <div className="ml-auto flex items-center gap-2 sm:gap-3">
           <NotificationCenter />
+          <ThemeSwitch />
           <ProfileDropdown />
         </div>
       </div>

@@ -11,6 +11,7 @@ import CreateQuiz from "./pages/CreateQuiz.jsx";
 import TakeExam from "./pages/TakeExam.jsx";
 import ResultPage from "./pages/ResultPage.jsx";
 import SyllabusPreview from "./pages/SyllabusPreview.jsx";
+import SettingsPage from "./pages/SettingsPage.jsx";
 
 export default function App() {
   return (
@@ -28,6 +29,7 @@ export default function App() {
           <Route path="/teacher" element={<TeacherDashboard />} />
           <Route path="/teacher/quizzes/new" element={<CreateQuiz />} />
           <Route path="/student" element={<StudentDashboard />} />
+          <Route path="/settings" element={<SettingsPage />} />
           <Route path="/student/exam/:quizId" element={<TakeExam />} />
           <Route path="/student/result/:submissionId" element={<ResultPage />} />
           <Route path="/student/syllabus/distributed-systems" element={<SyllabusPreview />} />

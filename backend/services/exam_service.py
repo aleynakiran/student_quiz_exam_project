@@ -116,8 +116,9 @@ class ExamService:
                 )
             )
 
-        max_score = max_possible_points(questions)
-        percentage = round((total_score / max_score) * 100, 2) if max_score > 0 else 0.0
+        max_points = max_possible_points(questions)
+        percentage = round((total_score / max_points) * 100, 2) if max_points > 0 else 0.0
+        score_out_of_100 = percentage
         passed = percentage >= 50.0
 
         self._db.add_all(rows)
@@ -126,7 +127,7 @@ class ExamService:
         self._db.add(
             Result(
                 submission_id=submission.id,
-                total_score=total_score,
+                total_score=score_out_of_100,
                 percentage=percentage,
                 passed=passed,
             )
@@ -138,8 +139,8 @@ class ExamService:
         return FinishExamResponse(
             submission_id=submission.id,
             quiz_title=quiz.title,
-            total_score=total_score,
-            max_score=max_score,
+            total_score=score_out_of_100,
+            max_score=100.0,
             percentage=percentage,
             passed=passed,
             wrong_answers=wrong_details,
@@ -201,12 +202,11 @@ class ExamService:
             question = row.question
             wrong_details.append(self._wrong_detail(question, row.selected_answer))
 
-        max_score = max_possible_points(questions)
         return ExamReviewResponse(
             submission_id=submission.id,
             quiz_title=quiz.title,
             total_score=result.total_score,
-            max_score=max_score,
+            max_score=100.0,
             percentage=result.percentage,
             passed=result.passed,
             wrong_answers=wrong_details,

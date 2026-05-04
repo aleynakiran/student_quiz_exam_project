@@ -270,12 +270,12 @@ export default function StudentDashboard() {
                       <td className="px-6 py-4 text-zinc-400">{row.teacher}</td>
                       <td className="px-6 py-4 text-zinc-300">{row.opensAt}</td>
                       <td className="px-6 py-4 text-zinc-300">{row.closesAt}</td>
-                      <td className="px-6 py-4">
-                        <span className="rounded-full border border-indigo-500/25 bg-indigo-500/10 px-2 py-1 text-[11px] font-semibold text-indigo-100">
+                      <td className="px-6 py-4 align-top">
+                        <span className="inline-flex rounded-full border border-indigo-500/25 bg-indigo-500/10 px-2 py-1 text-[11px] font-semibold text-indigo-100">
                           {row.countdownLabel}
                         </span>
                       </td>
-                      <td className="px-6 py-4 text-xs text-zinc-500">{row.mode}</td>
+                      <td className="px-6 py-4 align-top text-xs text-zinc-500">{row.mode}</td>
                     </tr>
                   ))}
                 </tbody>

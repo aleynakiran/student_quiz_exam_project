@@ -1,10 +1,14 @@
 import { AnimatePresence, motion } from "framer-motion";
-import { LogOut, Moon, Settings, UserRound } from "lucide-react";
+import { LogOut, Moon, Settings, Sun, UserRound } from "lucide-react";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext.jsx";
+import { useTheme } from "../context/ThemeContext.jsx";
 
 export default function ProfileDropdown() {
+  const navigate = useNavigate();
   const { user, logout } = useAuth();
+  const { theme, toggleTheme } = useTheme();
   const [open, setOpen] = useState(false);
   const [dense, setDense] = useState(
     () => localStorage.getItem("obsidian_dense_ui") === "1",
@@ -50,7 +54,7 @@ export default function ProfileDropdown() {
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: 6, scale: 0.98 }}
               transition={{ duration: 0.15 }}
-              className="absolute right-0 z-[70] mt-2 w-56 overflow-hidden rounded-2xl border border-white/10 bg-[#09090B]/95 shadow-glow backdrop-blur-xl"
+              className="theme-header-bg absolute right-0 z-[70] mt-2 w-56 overflow-hidden rounded-2xl border border-white/10 shadow-glow backdrop-blur-xl"
             >
               <div className="border-b border-white/5 px-3 py-3">
                 <p className="text-xs font-semibold text-white">Signed in</p>
@@ -68,10 +72,25 @@ export default function ProfileDropdown() {
                 <button
                   type="button"
                   className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-left text-sm text-zinc-300 transition hover:bg-white/[0.05]"
-                  onClick={() => setOpen(false)}
+                  onClick={() => {
+                    setOpen(false);
+                    navigate("/settings");
+                  }}
                 >
                   <Settings className="h-4 w-4 text-zinc-500" strokeWidth={1.75} />
                   Settings
+                </button>
+                <button
+                  type="button"
+                  className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-left text-sm text-zinc-300 transition hover:bg-white/[0.05]"
+                  onClick={toggleTheme}
+                >
+                  {theme === "dark" ? (
+                    <Sun className="h-4 w-4 text-zinc-500" strokeWidth={1.75} />
+                  ) : (
+                    <Moon className="h-4 w-4 text-zinc-500" strokeWidth={1.75} />
+                  )}
+                  {theme === "dark" ? "Light theme" : "Dark theme"}
                 </button>
                 <button
                   type="button"

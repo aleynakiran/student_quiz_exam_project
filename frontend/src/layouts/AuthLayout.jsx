@@ -1,5 +1,7 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { Outlet, useLocation } from "react-router-dom";
+import { Moon, Sun } from "lucide-react";
+import { useTheme } from "../context/ThemeContext.jsx";
 
 const overlayTransition = {
   initial: { opacity: 0, y: 14, filter: "blur(6px)" },
@@ -10,9 +12,18 @@ const overlayTransition = {
 
 export default function AuthLayout() {
   const location = useLocation();
+  const { theme, toggleTheme } = useTheme();
 
   return (
     <div className="relative flex min-h-screen items-center justify-center overflow-hidden px-4 py-16">
+      <button
+        type="button"
+        onClick={toggleTheme}
+        className="absolute right-4 top-4 z-20 inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/[0.06] px-3 py-2 text-xs font-medium text-zinc-300 backdrop-blur-md transition hover:border-white/20 hover:bg-white/[0.1]"
+      >
+        {theme === "dark" ? <Sun className="h-4 w-4" strokeWidth={1.75} /> : <Moon className="h-4 w-4" strokeWidth={1.75} />}
+        {theme === "dark" ? "Light" : "Dark"}
+      </button>
       <div
         aria-hidden
         className="pointer-events-none absolute inset-0 opacity-80"

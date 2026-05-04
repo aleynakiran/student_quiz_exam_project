@@ -34,11 +34,15 @@ export default function Sidebar({ mobileOpen, onClose }) {
 
   const sections =
     role === "admin"
-      ? [{ to: "/admin", label: "Admin overview", description: "Users & system health" }]
+      ? [
+          { to: "/admin", label: "Admin overview", description: "Users & system health" },
+          { to: "/settings", label: "Settings", description: "Theme & preferences" },
+        ]
       : role === "teacher"
         ? [
             { to: "/teacher", label: "Teacher workspace", description: "Quizzes & analytics" },
             { to: "/teacher/quizzes/new", label: "Compose quiz", description: "Questions & timing" },
+            { to: "/settings", label: "Settings", description: "Theme & preferences" },
           ]
         : [
             { to: "/student", label: "Student hub", description: "Browse available quizzes" },
@@ -47,6 +51,7 @@ export default function Sidebar({ mobileOpen, onClose }) {
               label: "Sample syllabus",
               description: "Distributed systems outline",
             },
+            { to: "/settings", label: "Settings", description: "Theme & preferences" },
           ];
 
   return (
