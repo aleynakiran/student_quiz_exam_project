@@ -283,7 +283,7 @@ def seed_if_needed(db: Session) -> None:
             "Timed scenario focusing on layered architectures, repositories, services, "
             "and exam-grade reliability patterns."
         ),
-        duration_minutes=30,
+        duration_minutes=15,
         items=architecture_items,
     )
 

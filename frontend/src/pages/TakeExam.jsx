@@ -16,7 +16,7 @@ import {
 import Timer from "../components/Timer.jsx";
 import ConfirmModal from "../components/ConfirmModal.jsx";
 import api from "../api/axios.js";
-import { EXAM_SESSION_STORAGE_KEY } from "../data/mockDashboard.js";
+import { EXAM_SESSION_STORAGE_KEY, examAttemptDeadlineStorageKey } from "../data/mockDashboard.js";
 
 function formatAxiosError(err) {
   const detail = err.response?.data?.detail;
@@ -46,11 +46,6 @@ export default function TakeExam() {
 
   const numericQuizId = Number(quizId);
 
-  const durationSeconds = useMemo(() => {
-    if (!session) return 0;
-    return Math.max(60, session.duration_minutes * 60);
-  }, [session]);
-
   const questions = session?.questions ?? [];
   const activeQuestion = questions[currentIndex];
 
@@ -63,37 +58,54 @@ export default function TakeExam() {
     return Math.round((answeredCount / questions.length) * 100);
   }, [answeredCount, questions.length]);
 
-  const startExam = useCallback(async () => {
-    setError("");
-    setLoading(true);
-    try {
-      const { data } = await api.post("/api/exams/start", { quiz_id: numericQuizId });
-      setSession(data);
-      startedAtRef.current = Date.now();
+  const startExam = useCallback(
+    async (signal) => {
+      setError("");
+      setLoading(true);
       try {
-        const draft = sessionStorage.getItem(`exam_draft_${data.submission_id}`);
-        if (draft) setAnswers(JSON.parse(draft));
-        else setAnswers({});
-      } catch {
-        setAnswers({});
+        const { data } = await api.post("/api/exams/start", { quiz_id: numericQuizId }, { signal });
+        if (signal.aborted) return;
+
+        const endsAt = Date.now() + data.duration_minutes * 60000;
+        try {
+          sessionStorage.setItem(
+            examAttemptDeadlineStorageKey(data.submission_id),
+            String(endsAt),
+          );
+          sessionStorage.setItem(
+            EXAM_SESSION_STORAGE_KEY,
+            JSON.stringify({
+              quizId: numericQuizId,
+              submissionId: data.submission_id,
+              title: data.quiz_title,
+              endsAt,
+            }),
+          );
+        } catch {
+          /* ignore */
+        }
+        if (signal.aborted) return;
+
+        setSession(data);
+        startedAtRef.current = Date.now();
+        try {
+          const draft = sessionStorage.getItem(`exam_draft_${data.submission_id}`);
+          if (draft) setAnswers(JSON.parse(draft));
+          else setAnswers({});
+        } catch {
+          setAnswers({});
+        }
+        setReviewMarks({});
+        setCurrentIndex(0);
+      } catch (err) {
+        if (signal.aborted || err?.code === "ERR_CANCELED" || err?.name === "CanceledError") return;
+        setError(formatAxiosError(err));
+      } finally {
+        if (!signal.aborted) setLoading(false);
       }
-      setReviewMarks({});
-      setCurrentIndex(0);
-      sessionStorage.setItem(
-        EXAM_SESSION_STORAGE_KEY,
-        JSON.stringify({
-          quizId: numericQuizId,
-          submissionId: data.submission_id,
-          title: data.quiz_title,
-          endsAt: Date.now() + data.duration_minutes * 60000,
-        }),
-      );
-    } catch (err) {
-      setError(formatAxiosError(err));
-    } finally {
-      setLoading(false);
-    }
-  }, [numericQuizId]);
+    },
+    [numericQuizId],
+  );
 
   useEffect(() => {
     if (!quizId || Number.isNaN(numericQuizId) || numericQuizId < 1) {
@@ -101,7 +113,9 @@ export default function TakeExam() {
       setLoading(false);
       return;
     }
-    startExam();
+    const ac = new AbortController();
+    startExam(ac.signal);
+    return () => ac.abort();
   }, [quizId, numericQuizId, startExam]);
 
   useEffect(() => {
@@ -151,6 +165,7 @@ export default function TakeExam() {
         };
         await api.post(`/api/exams/submissions/${session.submission_id}/finish`, payload);
         sessionStorage.removeItem(EXAM_SESSION_STORAGE_KEY);
+        sessionStorage.removeItem(examAttemptDeadlineStorageKey(session.submission_id));
         sessionStorage.removeItem(`exam_draft_${session.submission_id}`);
         const elapsedSec =
           startedAtRef.current != null ? Math.max(1, Math.round((Date.now() - startedAtRef.current) / 1000)) : null;
@@ -254,6 +269,11 @@ export default function TakeExam() {
             onClick={() => {
               if (!dirtyBlockNavigation || window.confirm("Leave attempt? Unsaved selections remain on this device.")) {
                 setDirtyBlockNavigation(false);
+                try {
+                  sessionStorage.removeItem(examAttemptDeadlineStorageKey(session.submission_id));
+                } catch {
+                  /* ignore */
+                }
                 navigate("/student");
               }
             }}
@@ -449,7 +469,12 @@ export default function TakeExam() {
                 <span className="text-[11px] text-zinc-500">{session.duration_minutes} min budget</span>
               </div>
               <div className="mt-4 flex justify-center sm:justify-start">
-                <Timer initialSeconds={durationSeconds} onExpire={handleExpire} />
+                {session?.submission_id != null && (
+                  <Timer
+                    deadlineStorageKey={examAttemptDeadlineStorageKey(session.submission_id)}
+                    onExpire={handleExpire}
+                  />
+                )}
               </div>
               <p className="mt-4 text-xs leading-relaxed text-zinc-500">
                 Under five minutes the capsule shifts to amber alert states — auto-submit still enforces fairness.

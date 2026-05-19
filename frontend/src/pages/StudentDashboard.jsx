@@ -19,6 +19,7 @@ import api from "../api/axios.js";
 import { useAuth } from "../context/AuthContext.jsx";
 import {
   EXAM_SESSION_STORAGE_KEY,
+  examAttemptDeadlineStorageKey,
   MOCK_ACTIVITY,
   MOCK_CALENDAR_EVENTS,
   MOCK_LEADERBOARD,
@@ -61,7 +62,16 @@ export default function StudentDashboard() {
       if (!raw) return;
       const parsed = JSON.parse(raw);
       if (parsed?.endsAt && parsed.endsAt > Date.now()) setActiveExam(parsed);
-      else sessionStorage.removeItem(EXAM_SESSION_STORAGE_KEY);
+      else {
+        if (parsed?.submissionId != null) {
+          try {
+            sessionStorage.removeItem(examAttemptDeadlineStorageKey(parsed.submissionId));
+          } catch {
+            /* ignore */
+          }
+        }
+        sessionStorage.removeItem(EXAM_SESSION_STORAGE_KEY);
+      }
     } catch {
       sessionStorage.removeItem(EXAM_SESSION_STORAGE_KEY);
     }
@@ -232,6 +242,13 @@ export default function StudentDashboard() {
                     type="button"
                     className="btn-ghost !text-xs"
                     onClick={() => {
+                      if (activeExam?.submissionId != null) {
+                        try {
+                          sessionStorage.removeItem(examAttemptDeadlineStorageKey(activeExam.submissionId));
+                        } catch {
+                          /* ignore */
+                        }
+                      }
                       sessionStorage.removeItem(EXAM_SESSION_STORAGE_KEY);
                       setActiveExam(null);
                     }}

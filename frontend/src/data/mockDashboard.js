@@ -144,3 +144,8 @@ export const MOCK_AUDIT_LOGS = [
 ];
 
 export const EXAM_SESSION_STORAGE_KEY = "obsidian_active_exam";
+
+/** Per-attempt wall-clock end (epoch ms) as string — timer reads this every tick so UI updates cannot reset the budget. */
+export function examAttemptDeadlineStorageKey(submissionId) {
+  return `exam_attempt_deadline_${Number(submissionId)}`;
+}
