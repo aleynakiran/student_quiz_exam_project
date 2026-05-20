@@ -48,3 +48,9 @@ def require_student(user: User = Depends(get_current_user)) -> User:
     if user.role != UserRole.STUDENT:
         raise HTTPException(status.HTTP_403_FORBIDDEN, detail="Student access only")
     return user
+
+
+def require_teacher(user: User = Depends(get_current_user)) -> User:
+    if user.role not in (UserRole.TEACHER, UserRole.ADMIN):
+        raise HTTPException(status.HTTP_403_FORBIDDEN, detail="Teacher access only")
+    return user

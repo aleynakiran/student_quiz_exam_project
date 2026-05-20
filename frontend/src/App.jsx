@@ -1,5 +1,6 @@
 import { Navigate, Route, Routes } from "react-router-dom";
 import ProtectedRoute from "./components/ProtectedRoute.jsx";
+import RoleRoute from "./components/RoleRoute.jsx";
 import DashboardLayout from "./layouts/DashboardLayout.jsx";
 import AuthLayout from "./layouts/AuthLayout.jsx";
 import Login from "./pages/Login.jsx";
@@ -26,13 +27,17 @@ export default function App() {
       <Route element={<ProtectedRoute />}>
         <Route element={<DashboardLayout />}>
           <Route path="/admin" element={<AdminDashboard />} />
-          <Route path="/teacher" element={<TeacherDashboard />} />
-          <Route path="/teacher/quizzes/new" element={<CreateQuiz />} />
-          <Route path="/student" element={<StudentDashboard />} />
+          <Route element={<RoleRoute allowed={["teacher", "admin"]} />}>
+            <Route path="/teacher" element={<TeacherDashboard />} />
+            <Route path="/teacher/quizzes/new" element={<CreateQuiz />} />
+          </Route>
           <Route path="/settings" element={<SettingsPage />} />
-          <Route path="/student/exam/:quizId" element={<TakeExam />} />
-          <Route path="/student/result/:submissionId" element={<ResultPage />} />
-          <Route path="/student/syllabus/distributed-systems" element={<SyllabusPreview />} />
+          <Route element={<RoleRoute allowed={["student"]} />}>
+            <Route path="/student" element={<StudentDashboard />} />
+            <Route path="/student/exam/:quizId" element={<TakeExam />} />
+            <Route path="/student/result/:submissionId" element={<ResultPage />} />
+            <Route path="/student/syllabus/distributed-systems" element={<SyllabusPreview />} />
+          </Route>
         </Route>
       </Route>
 
